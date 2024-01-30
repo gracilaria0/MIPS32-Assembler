@@ -3,22 +3,31 @@
 import sys
 
 
+ty = ['COMMON', 'BLANK', 'LABEL']
+
 
 class Statement(object):
     '''语句类'''
-    def __init__(self, type='COMMON', ) -> None:
-        if type in [
-            'COMMON',
-            'COMMENT',
-            'BLANK']:
-            self.type = type
-        else:
-            self.type = 'BAD'
+    def __init__(self, asmLine) -> None:
+        self.asmLine = asmLine
+        self.comment = ''
+        self.comment, b = Statement.normalize
+        
 
-    
     @staticmethod
-    def normalize(asmLine:str) -> tuple:
-        l = asmLine.lower().split()
+    def normalize(asmLine:str) -> (str,str):
+        sharpIndex = asmLine.find('#')
+        if sharpIndex == -1:
+            pass
+        # l = asmLine.
+        return '',''
+    
+
+    @staticmethod
+    def splitComment(asmLine:str) -> (str, str):
+        sharpIndex = asmLine.find('#')
+        return (asmLine[0 : sharpIndex]), asmLine[sharpIndex : -1]
+        
 
 
 def CommonStatement(Statement):
@@ -27,8 +36,8 @@ def CommonStatement(Statement):
         pass
 
 
-def CommentStatement(Statement):
-    '''注释语句类'''
+def LabelStatement(Statement):
+    '''标签语句类'''
     def __init__(self) -> None:
         pass
 
