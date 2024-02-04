@@ -1,32 +1,55 @@
 # code = utf-8
 
+import json
 import sys
+import re
 
 
 ty = ['COMMON', 'BLANK', 'LABEL']
 
 
+
+class UsageException(Exception):
+    def __init__(self, msg:str) -> None:
+        self.msg = msg
+
+
+
 class Statement(object):
     '''语句类'''
-    def __init__(self, asmLine) -> None:
-        self.asmLine = asmLine
-        self.comment = ''
-        self.comment, b = Statement.normalize
+    def __init__(self, initStruct) -> None:
+        pass
         
 
     @staticmethod
-    def normalize(asmLine:str) -> (str,str):
-        sharpIndex = asmLine.find('#')
-        if sharpIndex == -1:
-            pass
-        # l = asmLine.
-        return '',''
+    def normalize(asmLine:str, COMMANDS:list) -> dict:
+        content = Statement.getContent(asmLine)
+
+        initStruct = Statement.splitContent(content.lower(), COMMANDS)
+        
+        return initStruct
     
 
     @staticmethod
-    def splitComment(asmLine:str) -> (str, str):
-        sharpIndex = asmLine.find('#')
-        return (asmLine[0 : sharpIndex]), asmLine[sharpIndex : -1]
+    def getContent(asmLine:str) -> str:
+        return asmLine[0 : asmLine.find('#')]
+    
+
+    @staticmethod
+    def splitContent(content:str, COMMANDS:list) -> list:
+        initStruct = {'isBlank':True,}
+
+        for word in re.split('[ ,]+', content):
+            if word:
+                if word in COMMANDS:
+                    initStruct['isBlank'] = False
+                    initStruct['command'] = word
+                    
+                else:
+                    pass
+        
+
+
         
 
 
@@ -34,12 +57,7 @@ def CommonStatement(Statement):
     '''普通语句类'''
     def __init__(self) -> None:
         pass
-
-
-def LabelStatement(Statement):
-    '''标签语句类'''
-    def __init__(self) -> None:
-        pass
+        
 
 
 def Blank(Statement):
@@ -49,32 +67,67 @@ def Blank(Statement):
 
 
 
-def fopen(asmFilename:str):
+def argManage(argv:list) -> (str,):
+    if len(argv) != 2:
+        raise UsageException('ArgNum Error')
+    
+    return argv[1]
+
+
+
+def readCommand(jsonFilename) -> dict:
+    try:
+        fp = open(jsonFilename, 'r')
+        commandsJson = fp.read()
+        return json.loads(commandsJson)
+        
+    except FileNotFoundError:
+        raise UsageException('jsonFile Not Found')
+    
+    finally:
+        fp.close()
+
+
+
+def openAsm(asmFilename:str):
     try:
         fp = open(asmFilename, 'r')
-        return fp.readlines
+        return (l for l in fp.readlines())
 
     except FileNotFoundError:
-        return 'FileNotFound'
+        raise UsageException('asmFile Not Found')
+    
+    finally:
+        fp.close()
 
 
 
-def asmNormalize(asmLines:list) -> list:
-    for asmLine in asmLines:
-        asmLine.lower()
-        asmLine.split()
+def formStatements(asmLines, COMMANDS:list) -> list:
+    l = next(asmLines)
+    print(l)
+    l = Statement.normalize(l, COMMANDS)
+    print(l)
+    return []
+
 
 
 
 def main():
-    if len(sys.argv) != 2:
-        print(-1)
-        return -1
-    
-    asm = fopen(sys.argv[1])
-    if asm == 'FileNotFound':
-        print(-2)
-        return -2
+    try:
+        asmFilename = argManage(sys.argv)
+
+        COMMANDS = readCommand('./command.json')
+        
+        asmLines = openAsm(asmFilename)
+
+        statements = formStatements(asmLines, COMMANDS.keys())
+
+        
+
+
+
+    except UsageException as e:
+        print(e.msg)
     
 
 
