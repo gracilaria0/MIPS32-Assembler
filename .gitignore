@@ -3,3 +3,7 @@
 /reference
 
 /Mars4_5.jar
+
+/dist/
+/build/
+/*.spec
